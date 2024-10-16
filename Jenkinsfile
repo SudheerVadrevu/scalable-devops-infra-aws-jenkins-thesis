@@ -1,13 +1,10 @@
-projectName = "devops-example"
-repositoryName = "jenkinsfile"
-dockerRepository = "artifactory.dev.eficode.io"
+repositoryName = "master-thesis-rest-api"
+dockerRepository = "270131684808.dkr.ecr.eu-north-1.amazonaws.com"
 
-dockerImage = "${dockerRepository}/${projectName}/${repositoryName}"
+dockerImage = "${repositoryName}"
 
 pipeline {
-  agent {
-    label 'docker'
-  }
+  agent any
   
   environment {
     BUILD_TAG = "${env.BUILD_TAG}"
@@ -26,20 +23,30 @@ pipeline {
   
     stage('Build') {
       steps {
-        sh "docker build -t ${repositoryName}:latest ."
-        sh "docker tag ${repositoryName}:latest ${dockerImage}:latest"
+        sh "docker build -t ${repositoryName}:latest app"
+        sh "docker tag ${repositoryName}:latest ${dockerImage}:${BUILD_ID}"
       }
     }
 
     stage('Push to Artifactory') {
+      steps{
+        script{
+              docker.withRegistry('http://270131684808.dkr.ecr.eu-north-1.amazonaws.com/master-thesis--api', 'ecr:eu-north-1:aws') {
+              docker.image("${dockerImage}").push("${BUILD_ID}")
+              }
+            }
+    }
+    }
+
+    stage('Deploy to K8S') {
       steps {
-        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'project-templates-bot',
-          usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-
-          sh "docker login ${dockerRepository} -u $USERNAME -p $PASSWORD"
-
-          sh "docker push ${dockerImage}:latest || (echo 'Looks like the push failed. Did you remember to bump the package version number?' && false)"
+        withEnv(['KUBECONFIG=/home/ubuntu/.kube/config']){
+          sh "which aws"
+            sh "aws --version"
+            sh "kubectl get pods"
+            sh "kubectl apply -f k8s/deployment.yaml"
         }
+          
       }
     }
   }

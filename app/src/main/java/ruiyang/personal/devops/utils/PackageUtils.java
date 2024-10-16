@@ -37,5 +37,4 @@ public class PackageUtils {
         }
         return Arrays.asList(depString.split(", "));
     }
-
 }
