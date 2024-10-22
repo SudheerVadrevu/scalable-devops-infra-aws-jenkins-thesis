@@ -31,22 +31,24 @@ pipeline {
     stage('Push to Artifactory') {
       steps{
         script{
-              docker.withRegistry('http://270131684808.dkr.ecr.eu-north-1.amazonaws.com/master-thesis--api', 'ecr:eu-north-1:aws') {
-              docker.image("${dockerImage}").push("${BUILD_ID}")
-              }
-            }
-    }
+          docker.withRegistry('http://270131684808.dkr.ecr.eu-north-1.amazonaws.com/master-thesis--api', 'ecr:eu-north-1:aws') {
+          docker.image("${dockerImage}").push("${BUILD_ID}")
+          }
+        }
+      }
     }
 
     stage('Deploy to K8S') {
       steps {
-        withEnv(['KUBECONFIG=/home/ubuntu/.kube/config']){
-          sh "which aws"
-            sh "aws --version"
-            sh "kubectl get pods"
-            sh "kubectl apply -f k8s/deployment.yaml"
+        withCredentials([usernamePassword(credentialsId: 'aws_pwd', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+          withEnv(['KUBECONFIG=/home/ubuntu/.kube/config', 'AWS_CONFIG_FILE=/home/ubuntu/.aws/config']){
+            sh '''#!/bin/bash
+            sudo apt install python3-pip
+            pip3 install --upgrade --user awscli
+            kubectl apply -f k8s/yaml/deployment.yaml
+          '''
+          }
         }
-          
       }
     }
   }
