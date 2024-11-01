@@ -43,8 +43,6 @@ pipeline {
         withCredentials([usernamePassword(credentialsId: 'aws_pwd', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
           withEnv(['KUBECONFIG=/home/ubuntu/.kube/config', 'AWS_CONFIG_FILE=/home/ubuntu/.aws/config']){
             sh '''#!/bin/bash
-            sudo apt install python3-pip
-            pip3 install --upgrade --user awscli
             kubectl apply -f k8s/yaml/deployment.yaml
           '''
           }
