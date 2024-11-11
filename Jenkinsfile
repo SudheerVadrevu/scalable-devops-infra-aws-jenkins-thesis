@@ -44,6 +44,7 @@ pipeline {
           withEnv(['KUBECONFIG=/home/ubuntu/.kube/config', 'AWS_CONFIG_FILE=/home/ubuntu/.aws/config']){
             sh '''#!/bin/bash
             env
+            pip3 list
             kubectl apply -f k8s/yaml/deployment.yaml
             
           '''
