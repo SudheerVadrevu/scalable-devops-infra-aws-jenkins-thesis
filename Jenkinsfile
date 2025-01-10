@@ -1,10 +1,15 @@
 repositoryName = "master-thesis-rest-api"
-dockerRepository = "270131684808.dkr.ecr.eu-north-1.amazonaws.com"
+dockerRepository = "585466297447.dkr.ecr.eu-north-1.amazonaws.com"
 
 dockerImage = "${repositoryName}"
 
 pipeline {
-  agent any
+        agent {
+            ecs {
+                inheritFrom 'ecs'
+                label 'test'
+            }
+        }
   
   environment {
     BUILD_TAG = "${env.BUILD_TAG}"
@@ -31,7 +36,7 @@ pipeline {
     stage('Push to Artifactory') {
       steps{
         script{
-          docker.withRegistry('http://270131684808.dkr.ecr.eu-north-1.amazonaws.com/master-thesis--api', 'ecr:eu-north-1:aws') {
+          docker.withRegistry("http://${dockerRepository}/${repositoryName}", 'ecr:eu-north-1:aws_cred') {
           docker.image("${dockerImage}").push("${BUILD_ID}")
           }
         }
@@ -39,6 +44,9 @@ pipeline {
     }
 
     stage('Deploy to K8S') {
+        when {
+                branch 'production'
+            }
       steps {
         withCredentials([usernamePassword(credentialsId: 'aws_pwd', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
           withEnv(['KUBECONFIG=/home/ubuntu/.kube/config', 'AWS_CONFIG_FILE=/home/ubuntu/.aws/config']){

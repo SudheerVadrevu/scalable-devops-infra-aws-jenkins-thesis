@@ -2,6 +2,7 @@ plugins {
 	id 'org.springframework.boot' version '2.2.4.RELEASE'
 	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
 	id 'java'
+  	id "org.sonarqube" version "2.7"
 }
 
 group = 'ruiyang.personal'
@@ -21,4 +22,10 @@ dependencies {
 
 test {
 	useJUnitPlatform()
+}
+
+sonarqube {
+    properties {
+        property "sonar.sourceEncoding", "UTF-8"
+    }
 }
