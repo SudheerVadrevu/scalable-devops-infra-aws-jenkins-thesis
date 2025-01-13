@@ -4,13 +4,7 @@ dockerRepository = "585466297447.dkr.ecr.eu-north-1.amazonaws.com"
 dockerImage = "${repositoryName}"
 
 pipeline {
-        agent {
-            ecs {
-                inheritFrom 'ecs'
-                label 'test'
-            }
-        }
-  
+  agent any
   environment {
     BUILD_TAG = "${env.BUILD_TAG}"
   }
@@ -22,23 +16,35 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
+        sh 'printenv'
         checkout scm
+        stash(excludes: '.git', name: 'code')
       }
     }
   
     stage('Build') {
+        agent {
+            ecs {
+                inheritFrom 'ecs'
+                label 'test'
+            }
+        }
       steps {
+      // Build, TODO: change Docker to something else
+      unstash 'code'
         sh "docker build -t ${repositoryName}:latest app"
         sh "docker tag ${repositoryName}:latest ${dockerImage}:${BUILD_ID}"
+        sh "docker image prune -f"
       }
     }
 
     stage('Push to Artifactory') {
       steps{
-        script{
-          docker.withRegistry("http://${dockerRepository}/${repositoryName}", 'ecr:eu-north-1:aws_cred') {
-          docker.image("${dockerImage}").push("${BUILD_ID}")
-          }
+        sh 'echo push'
+        // script{
+        //   docker.withRegistry("http://${dockerRepository}/${repositoryName}", 'ecr:eu-north-1:aws_cred') {
+        //   docker.image("${dockerImage}").push("${BUILD_ID}")
+        //   }
         }
       }
     }
@@ -62,4 +68,3 @@ pipeline {
       }
     }
   }
-}
