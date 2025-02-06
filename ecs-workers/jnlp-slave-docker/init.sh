@@ -1,2 +1,2 @@
 service docker start
-jenkins-agent $*
+jenkins-slave $*

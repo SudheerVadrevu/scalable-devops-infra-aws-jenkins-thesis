@@ -1,7 +1,4 @@
 repositoryName = "master-thesis-rest-api"
-dockerRepository = "585466297447.dkr.ecr.eu-north-1.amazonaws.com"
-
-dockerImage = "${repositoryName}"
 
 pipeline {
           agent {
@@ -30,9 +27,7 @@ pipeline {
       steps {
       // Build, TODO: change Docker to something else
       // unstash 'code'
-        sh "docker build -t ${repositoryName}:latest app"
-        sh "docker tag ${repositoryName}:latest ${dockerImage}:${BUILD_ID}"
-        sh "docker image prune -f"
+        sh "./scripts/gradle_build.sh"
       }
     }
 
