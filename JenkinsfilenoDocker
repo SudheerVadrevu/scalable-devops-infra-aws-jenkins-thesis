@@ -1,5 +1,3 @@
-repositoryName = "master-thesis-rest-api"
-
 pipeline {
           agent {
             ecs {
@@ -31,15 +29,6 @@ pipeline {
       }
     }
 
-    stage('Push to Artifactory') {
-      steps{
-        sh 'echo push'
-        // script{
-        //   docker.withRegistry("http://${dockerRepository}/${repositoryName}", 'ecr:eu-north-1:aws_cred') {
-        //   docker.image("${dockerImage}").push("${BUILD_ID}")
-        //   }
-        }
-      }
   stage('Deploy to K8S') {
         when {
                 branch 'production'
@@ -60,5 +49,9 @@ pipeline {
     }
     }
 
-  
+   post {
+        always {
+            archiveArtifacts artifacts: 'app/build/libs/**/*.jar', fingerprint: true
+        }
+    }
   }
