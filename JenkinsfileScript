@@ -1,0 +1,36 @@
+def artifactory_url="http://35.187.12.49:8082/artifactory"
+def username="admin"
+def encrypted_password="APBY2sREFn9z19xZAyEa2mZczfq" // generate it from your Artifactory profile
+node('ecs') {
+      def server = Artifactory.newServer url: artifactory_url, username: username, password: encrypted_password
+  def buildInfo = Artifactory.newBuildInfo()
+  buildInfo.env.capture = true
+    stage('Preparation') { // for display purposes
+      // This is where you normally checkout your source repository
+      deleteDir() //Deletes the entire workspace content
+  }
+    stage('Checkout') {
+        checkout scm
+        // stash(excludes: '.git', name: 'code')
+    }
+  
+    stage('Build') {
+
+      // Build, TODO: change Docker to something else
+      // unstash 'code'
+        sh "./scripts/gradle_build.sh"
+    }
+    stage('Push to Artifactory') {
+              def uploadSpec = """{
+          "files": [
+          {
+            "pattern": "app/build/libs/**/*.jar",
+            "target": "rd-gradle-all-virtual/acme/artifact/1.${currentBuild.number}/artifact-1.${currentBuild.number}.jar"
+          }
+          ]
+      }"""
+    server.upload spec: uploadSpec, buildInfo: buildInfo
+    server.publishBuildInfo buildInfo
+    }
+
+  }

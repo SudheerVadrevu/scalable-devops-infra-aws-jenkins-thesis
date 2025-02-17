@@ -1,7 +1,13 @@
+module network {
+  source = "../networking"
+  contact  = var.contact
+  ecs_cluster_name = var.ecs_cluster_name
+}
+
 resource "aws_security_group" "sg_jenkins" {
   name = "sg_${var.ecs_cluster_name}"
-  description = "Allows all traffic"
-  vpc_id = aws_vpc.cluster_vpc.id
+  description = "Sg for Jenkins Cluster"
+  vpc_id = module.network.vpc_id
 
   ingress {
     from_port = 22
@@ -12,8 +18,8 @@ resource "aws_security_group" "sg_jenkins" {
   }
 
   ingress {
-    from_port = 80
-    to_port = 80
+    from_port = 8080
+    to_port = 8080
     protocol = "tcp"
     cidr_blocks = [
       "0.0.0.0/0"]
@@ -42,4 +48,8 @@ resource "aws_security_group" "sg_jenkins" {
     cidr_blocks = [
       "0.0.0.0/0"]
   }
+    tags  = {
+        Contact = var.contact
+        Department = var.department
+    }
 }
