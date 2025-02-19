@@ -1,5 +1,5 @@
 pipeline {
-          agent {
+        agent {
             ecs {
                 inheritFrom 'ecs'
             }
@@ -10,23 +10,37 @@ pipeline {
 
   options {
     timeout(time: 20, unit: 'MINUTES')
+    skipDefaultCheckout true
   }
 
-  stages {
+  stages {  
     stage('Checkout') {
+
       steps {
         checkout scm
-        // stash(excludes: '.git', name: 'code')
       }
     }
   
     stage('Build') {
-
       steps {
-      // Build, TODO: change Docker to something else
-      // unstash 'code'
         sh "./scripts/gradle_build.sh"
+        stash includes: 'app/build/libs/**/*.jar', name: 'jar' 
+        stash includes: 'docker-images/spring-boot-web-app/Dockerfile', name: 'docker'
       }
+    }
+
+    stage('Build docker image') {
+    agent any
+      steps {
+      unstash 'jar'
+      unstash 'docker'
+      sh '''
+        cp docker-images/spring-boot-web-app/Dockerfile app/build/libs
+        cd app/build/libs
+        docker build -t webapp:$BUILD_TAG .
+      '''
+      }
+
     }
 
   stage('Deploy to K8S') {
@@ -49,9 +63,4 @@ pipeline {
     }
     }
 
-   post {
-        always {
-            archiveArtifacts artifacts: 'app/build/libs/**/*.jar', fingerprint: true
-        }
-    }
   }
