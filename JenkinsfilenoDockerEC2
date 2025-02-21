@@ -1,8 +1,7 @@
 pipeline {
         agent {
-            ecs {
-                inheritFrom 'ecs'
-            }
+                label 'ec2-fixed'
+            
         }
   environment {
     BUILD_TAG = "${env.BUILD_TAG}"
@@ -23,14 +22,21 @@ pipeline {
   
     stage('Build') {
       steps {
-        sh "./scripts/gradle_build.sh"
+        sh '''
+        export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.252.b09-2.amzn2.0.1.x86_64
+        export PATH=$PATH:/opt/gradle/gradle-6.2.1/bin
+        ./scripts/gradle_build.sh
+        '''
         stash includes: 'app/build/libs/**/*.jar', name: 'jar' 
         stash includes: 'docker-images/spring-boot-web-app/Dockerfile', name: 'docker'
       }
     }
 
     stage('Build docker image') {
-    agent any
+            agent {
+                label 'master'
+            
+        }
       steps {
       unstash 'jar'
       unstash 'docker'
@@ -42,8 +48,11 @@ pipeline {
       }
     }
     
-    stage('Push to ECR') {
-            agent any
+    stage('Push to Artifactory') {
+                    agent {
+                label 'master'
+            
+        }
       steps{
         script{
               docker.withRegistry('http://585466297447.dkr.ecr.eu-north-1.amazonaws.com/webapp', 'ecr:eu-north-1:aws') {
