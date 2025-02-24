@@ -1,13 +1,9 @@
-repositoryName = "master-thesis-rest-api"
-dockerRepository = "585466297447.dkr.ecr.eu-north-1.amazonaws.com"
-
-dockerImage = "${repositoryName}"
-
 pipeline {
-          agent {
-            ecs {
+        agent {
+                        ecs {
                 inheritFrom 'ecs'
             }
+            
         }
   environment {
     BUILD_TAG = "${env.BUILD_TAG}"
@@ -15,42 +11,69 @@ pipeline {
 
   options {
     timeout(time: 20, unit: 'MINUTES')
+    skipDefaultCheckout true
   }
 
-  stages {
+  stages {  
     stage('Checkout') {
+
       steps {
         checkout scm
-        // stash(excludes: '.git', name: 'code')
       }
     }
   
     stage('Build') {
-
       steps {
-      // Build, TODO: change Docker to something else
-      // unstash 'code'
-        sh "docker build -t ${repositoryName}:latest app"
-        sh "docker tag ${repositoryName}:latest ${dockerImage}:${BUILD_ID}"
-        sh "docker image prune -f"
+        sh '''
+        ./scripts/gradle_build.sh
+        '''
+        stash includes: 'app/build/libs/**/*.jar', name: 'jar' 
+        stash includes: 'docker-images/spring-boot-web-app/Dockerfile', name: 'docker'
       }
     }
 
-    stage('Push to Artifactory') {
-      steps{
-        sh 'echo push'
-        // script{
-        //   docker.withRegistry("http://${dockerRepository}/${repositoryName}", 'ecr:eu-north-1:aws_cred') {
-        //   docker.image("${dockerImage}").push("${BUILD_ID}")
-        //   }
+    stage('Build docker image') {
+            agent {
+                label 'master'
+            
         }
-      }
-  stage('Deploy to K8S') {
-        when {
-                branch 'production'
-            }
       steps {
-        withCredentials([usernamePassword(credentialsId: 'aws_pwd', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+      unstash 'jar'
+      unstash 'docker'
+      sh '''
+        cp docker-images/spring-boot-web-app/Dockerfile app/build/libs
+        cd app/build/libs
+        docker build -t webapp:$BUILD_TAG .
+      '''
+      }
+    }
+    
+    stage('Push to Artifactory') {
+                    agent {
+                label 'master'
+            
+        }
+      steps{
+        script{
+              docker.withRegistry('http://585466297447.dkr.ecr.eu-north-1.amazonaws.com/webapp', 'ecr:eu-north-1:aws') {
+              docker.image("webapp:${BUILD_TAG}").push("${BUILD_ID}")
+              }
+            }
+            sh "docker rmi webapp:${BUILD_TAG}"
+    }
+
+    }
+
+  stage('Deploy to K8S') {
+                  agent {
+                label 'master'
+            
+        }
+        // when {
+        //         branch 'master'
+        //     }
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'awspwd', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
           withEnv(['KUBECONFIG=/home/ubuntu/.kube/config', 'AWS_CONFIG_FILE=/home/ubuntu/.aws/config']){
             sh '''
             #!/bin/bash
@@ -65,5 +88,4 @@ pipeline {
     }
     }
 
-  
   }

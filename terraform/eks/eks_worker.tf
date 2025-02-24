@@ -51,4 +51,8 @@ resource "aws_eks_node_group" "thesis" {
     aws_iam_role_policy_attachment.ruiyang-thesis-node-AmazonEKS_CNI_Policy,
     aws_iam_role_policy_attachment.ruiyang-thesis-node-AmazonEC2ContainerRegistryReadOnly,
   ]
+    tags = {
+    Contact = var.contact
+    Department = var.department
+  }
 }

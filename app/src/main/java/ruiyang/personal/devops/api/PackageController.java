@@ -23,4 +23,10 @@ public class PackageController {
             ) throws IOException {
         return packageService.getAllPackages();
     }
+
+    @GetMapping("hi")
+    public String hi(
+            ) throws IOException {
+        return "Hello world";
+    }
 }

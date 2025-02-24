@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
     name: master-thesis-rest-api
@@ -17,7 +17,7 @@ spec:
         spec:
             containers:
             - name: linux-package-info
-              image: 270131684808.dkr.ecr.eu-north-1.amazonaws.com/master-thesis-rest-api:latest
+              image: 585466297447.dkr.ecr.eu-north-1.amazonaws.com/webapp:latest
               imagePullPolicy: Always
               ports:
                 - containerPort: 8080

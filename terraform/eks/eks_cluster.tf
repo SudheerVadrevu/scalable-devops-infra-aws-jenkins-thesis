@@ -38,7 +38,8 @@ resource "aws_security_group" "ruiyang-thesis-cluster" {
   }
 
   tags = {
-    Name = "terraform-eks-ruiyang-thesis-cluster"
+    Contact = var.contact
+    Department = var.department
   }
 }
 
@@ -76,4 +77,8 @@ resource "aws_eks_cluster" "ruiyang-master-thesis" {
     aws_iam_role_policy_attachment.ruiyang-thesis-cluster-AmazonEKSClusterPolicy,
     aws_iam_role_policy_attachment.ruiyang-thesis-cluster-AmazonEKSServicePolicy,
   ]
+    tags = {
+    Contact = var.contact
+    Department = var.department
+  }
 }

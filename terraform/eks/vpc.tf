@@ -17,7 +17,7 @@ resource "aws_subnet" "ruiyang-thesis-cluster" {
   availability_zone = data.aws_availability_zones.available.names[count.index]
   cidr_block        = "10.0.${count.index}.0/24"
   vpc_id            = aws_vpc.ruiyang-thesis-cluster.id
-
+  map_public_ip_on_launch = true
   tags = map(
     "Name", "ruiyang-thesis-cluster-node",
     "kubernetes.io/cluster/${var.cluster_name}", "shared",

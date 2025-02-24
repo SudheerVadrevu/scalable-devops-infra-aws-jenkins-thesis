@@ -11,6 +11,18 @@ variable "env_name" {
   default = "test"
 }
 
+variable department {
+  type        = string
+  default     = "devops-fi-hki"
+  description = "tag"
+}
+
+variable contact {
+  type        = string
+  description = "tag"
+}
+
+
 variable "frontend_ssh_port" {
   default     = 22
 }

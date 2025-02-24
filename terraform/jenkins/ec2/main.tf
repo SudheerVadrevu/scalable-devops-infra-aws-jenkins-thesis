@@ -20,7 +20,7 @@ resource "aws_instance" "jenkins_master" {
  associate_public_ip_address = true
  iam_instance_profile        = aws_iam_instance_profile.jenkins_profile.name
 	user_data = file("ec2/scripts/install_jenkins.sh")
-    tags = {
+tags = {
         Contact = var.contact
         Department = var.department
     }
