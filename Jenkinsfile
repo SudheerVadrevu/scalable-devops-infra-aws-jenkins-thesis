@@ -76,8 +76,6 @@ pipeline {
         withCredentials([usernamePassword(credentialsId: 'awspwd', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
           withEnv(['KUBECONFIG=/home/ubuntu/.kube/config', 'AWS_CONFIG_FILE=/home/ubuntu/.aws/config']){
             sh '''
-            #!/bin/bash
-            echo "The location of kubeconfig is $KUBECONFIG"
             # Update kube config
             aws eks --region eu-north-1 update-kubeconfig --name ruiyang_master_thesis --kubeconfig $KUBECONFIG
             kubectl apply -f k8s/yaml/deployment.yaml
