@@ -1,0 +1,18 @@
+version: 0.2
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - REPOSITORY_URI=585466297447.dkr.ecr.eu-north-1.amazonaws.com/webapp
+      - $(aws ecr get-login --region eu-north-1 --no-include-email)
+  build:
+      commands:
+        - ./scripts/gradle_build.sh
+  post_build:
+      commands:
+        - cp docker-images/spring-boot-web-app/Dockerfile app/build/libs
+        - cd app/build/libs
+        - docker build -t $REPOSITORY_URI:latest .
+        - docker push $REPOSITORY_URI:latest
+        - docker rmi $REPOSITORY_URI:latest

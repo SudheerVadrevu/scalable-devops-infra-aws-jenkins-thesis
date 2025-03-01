@@ -48,7 +48,7 @@ pipeline {
       }
     }
     
-    stage('Push to Artifactory') {
+    stage('Push to ECR') {
                     agent {
                 label 'master'
             
@@ -56,7 +56,7 @@ pipeline {
       steps{
         script{
               docker.withRegistry('http://585466297447.dkr.ecr.eu-north-1.amazonaws.com/webapp', 'ecr:eu-north-1:aws') {
-              docker.image("webapp:${BUILD_TAG}").push("${BUILD_ID}")
+              docker.image("webapp:${BUILD_TAG}").push("latest")
               }
             }
             sh "docker rmi webapp:${BUILD_TAG}"
@@ -64,7 +64,7 @@ pipeline {
 
     }
 
-  stage('Deploy to K8S') {
+  stage('Deploy') {
                   agent {
                 label 'master'
             
@@ -74,13 +74,9 @@ pipeline {
         //     }
       steps {
         withCredentials([usernamePassword(credentialsId: 'awspwd', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-          withEnv(['KUBECONFIG=/home/ubuntu/.kube/config', 'AWS_CONFIG_FILE=/home/ubuntu/.aws/config']){
             sh '''
-            # Update kube config
-            aws eks --region eu-north-1 update-kubeconfig --name ruiyang_master_thesis --kubeconfig $KUBECONFIG
-            kubectl apply -f k8s/yaml/deployment.yaml
+           ecs-deploy -k $AWS_ACCESS_KEY_ID -s $AWS_SECRET_ACCESS_KEY -r eu-north-1 -c ruiyang_test -d spring-farget -i 585466297447.dkr.ecr.eu-north-1.amazonaws.com/webapp
           '''
-          }
         }
       }
     }
