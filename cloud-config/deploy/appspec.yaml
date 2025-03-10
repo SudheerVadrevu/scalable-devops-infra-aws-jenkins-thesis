@@ -1,0 +1,10 @@
+version: 0.0
+Resources:
+  - TargetService:
+      Type: AWS::ECS::Service
+      Properties:
+        TaskDefinition: "arn:aws:ecs:eu-north-1:585466297447:task-definition/spring-task-def:2"
+        LoadBalancerInfo:
+          ContainerName: "webapp"
+          ContainerPort: 8080
+        PlatformVersion: "LATEST"

@@ -1,0 +1,12 @@
+{
+    "applicationName": "spring_web_application",
+    "deploymentGroupName": "bluegreen",
+    "revision": {
+        "revisionType": "S3",
+        "s3Location": {
+            "bucket": "spring-bluegreen-bucket",
+            "key": "appspec.yaml",
+            "bundleType": "YAML"
+        }
+    }
+}

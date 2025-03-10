@@ -20,3 +20,8 @@ phases:
         - docker build -t $REPOSITORY_URI:latest .
         - docker push $REPOSITORY_URI:latest
         - docker rmi $REPOSITORY_URI:latest
+
+artifacts:
+    files:
+      - cloud-config/deploy/appspec.yaml
+    discard-paths: yes

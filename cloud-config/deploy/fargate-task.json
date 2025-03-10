@@ -1,0 +1,32 @@
+{
+    "family": "spring-task-def",
+        "networkMode": "awsvpc",
+        "containerDefinitions": [
+            {
+                "name": "webapp",
+                "image": "585466297447.dkr.ecr.eu-north-1.amazonaws.com/webapp:latest",
+                "portMappings": [
+                    {
+                        "containerPort": 8080,
+                        "hostPort": 8080,
+                        "protocol": "tcp"
+                    }
+                ],
+                "essential": true,
+                "logConfiguration": {
+                    "logDriver": "awslogs",
+                    "options": {
+                      "awslogs-group": "/ecs/spring-farget",
+                      "awslogs-region": "eu-north-1",
+                      "awslogs-stream-prefix": "ecs"
+                    }
+                  }
+            }
+        ],
+        "requiresCompatibilities": [
+            "FARGATE"
+        ],
+        "cpu": "512",
+        "memory": "1024",
+        "executionRoleArn": "arn:aws:iam::585466297447:role/ecsTaskExecutionRole"
+}
