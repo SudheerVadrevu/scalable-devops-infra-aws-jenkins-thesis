@@ -23,5 +23,5 @@ phases:
 
 artifacts:
     files:
-      - cloud-config/deploy/appspec.yaml
+      - codepipeline/deploy/appspec.yaml
     discard-paths: yes
