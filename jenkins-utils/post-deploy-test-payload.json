@@ -1,0 +1,7 @@
+{
+    "url": "http://bluegreen-alb-1565976610.eu-north-1.elb.amazonaws.com/",
+    "endpoints": [
+      "packages",
+      ""
+    ]
+  }

@@ -69,13 +69,28 @@ pipeline {
                 label 'master'
             
         }
-        // when {
-        //         branch 'master'
-        //     }
+        when {
+                branch 'master'
+            }
       steps {
         withCredentials([usernamePassword(credentialsId: 'awspwd', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
             sh '''
            ecs-deploy -k $AWS_ACCESS_KEY_ID -s $AWS_SECRET_ACCESS_KEY -r eu-north-1 -c ruiyang_test -d spring-farget -i 585466297447.dkr.ecr.eu-north-1.amazonaws.com/webapp
+          '''
+        }
+      }
+    }
+      stage('Intergration test') {
+        agent {
+                label 'master'
+            
+        }
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'awspwd', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+            sh '''
+            aws lambda invoke --function-name post-deploy-test out --log-type Tail \
+            --payload fileb://jenkins-utils/post-deploy-test-payload.json \
+            --query 'LogResult' --output text |  base64
           '''
         }
       }
