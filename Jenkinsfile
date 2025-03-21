@@ -69,9 +69,6 @@ pipeline {
                 label 'master'
             
         }
-        when {
-                branch 'master'
-            }
       steps {
         withCredentials([usernamePassword(credentialsId: 'awspwd', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
             sh '''
@@ -80,7 +77,7 @@ pipeline {
         }
       }
     }
-      stage('Intergration test') {
+      stage('API Test') {
         agent {
                 label 'master'
             
