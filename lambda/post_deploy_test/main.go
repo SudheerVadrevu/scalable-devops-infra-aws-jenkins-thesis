@@ -73,14 +73,14 @@ func onDeployed(ctx context.Context, deploy deployEvent) (testResult, error) {
 			totalNum++
 			fmt.Printf("Get result of url: %s \n", r.url)
 			if r.response.StatusCode != 200 || r.err != nil {
-				result[r.url] = fmt.Sprintf("%s failed, status code %d, error %s", r.url, r.response.StatusCode, r.err)
+				result[r.url] = fmt.Sprintf("Failed, status code %d, error %s", r.response.StatusCode, r.err)
 			} else {
-				result[r.url] = fmt.Sprintf("%s succeed, response body (first %d characters): %s", r.url, bodyCharNum, keepChars(r.body, bodyCharNum))
+				result[r.url] = fmt.Sprintf("Succeed, response body (first %d characters): %s", bodyCharNum, keepChars(r.body, bodyCharNum))
 				successNum++
 			}
 			fmt.Printf("%d out of %d endpoints tested, %d succeed \n", totalNum, len(endpoints), successNum)
 			if totalNum == len(endpoints) {
-				fmt.Println("All endpoints are tested, result:", prettyPrint(result))
+				fmt.Println("All endpoints are tested, result:\n", prettyPrint(result))
 				return testResult{fmt.Sprintf("Test is done, %d out of %d was succeed \n", successNum, len(result)), float32(successNum) / float32(len(result)), result}, nil
 			}
 		}
