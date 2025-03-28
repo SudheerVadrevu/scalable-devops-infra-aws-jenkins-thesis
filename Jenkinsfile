@@ -33,21 +33,33 @@ pipeline {
     }
 
     stage('Build docker image') {
-      agent {
-        label 'master'
-
-      }
-      steps {
-        unstash 'jar'
-        unstash 'docker'
-        sh '''
-        cp docker-images/spring-boot-web-app/Dockerfile app/build/libs
-        cd app/build/libs
-        docker build -t webapp:$BUILD_TAG .
-        cd ../../../monitoring
-        docker build -t grafana grafana
-        docker build -t prometheus prometheus
-        '''
+        parallel {
+        stage('Software Project') {
+        agent {
+          label 'master'
+        }
+          steps {
+            unstash 'jar'
+            unstash 'docker'
+            sh '''
+            cp docker-images/spring-boot-web-app/Dockerfile app/build/libs
+            cd app/build/libs
+            docker build -t webapp:$BUILD_TAG .
+            '''
+          }
+        }
+        stage('Monitoring System') {
+        agent {
+          label 'master'
+        }
+          steps {
+            sh '''
+            cd monitoring
+            docker build -t grafana grafana
+            docker build -t prometheus prometheus
+            '''
+          }   
+        }
       }
     }
 
