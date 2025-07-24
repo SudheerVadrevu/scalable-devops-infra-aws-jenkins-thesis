@@ -23,5 +23,4 @@ public class PackageController {
             ) throws IOException {
         return packageService.getAllPackages();
     }
-
 }
