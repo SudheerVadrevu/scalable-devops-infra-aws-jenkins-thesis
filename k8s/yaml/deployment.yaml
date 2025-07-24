@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+    name: master-thesis-rest-api
+    labels: 
+        app: linux-package-info
+spec:
+    replicas: 1
+    selector:
+        matchLabels:        # labels the replica selector should match
+          app: linux-package-info
+    template:
+        metadata:
+            labels: 
+                app: linux-package-info
+                version: 0.0.1
+        spec:
+            containers:
+            - name: linux-package-info
+              image: 270131684808.dkr.ecr.eu-north-1.amazonaws.com/master-thesis-rest-api:latest
+              imagePullPolicy: Always
+              ports:
+                - containerPort: 8080
